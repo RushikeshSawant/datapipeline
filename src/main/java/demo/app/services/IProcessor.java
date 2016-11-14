@@ -8,5 +8,10 @@ package demo.app.services;
  */
 public interface IProcessor<T> {
 
+	/**
+	 * Implementing types to perform data/resource specific processing
+	 * @param resource
+	 * @return
+	 */
 	long process(T resource);
 }
