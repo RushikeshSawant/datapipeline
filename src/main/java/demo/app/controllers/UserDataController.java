@@ -2,8 +2,6 @@ package demo.app.controllers;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,7 +27,6 @@ import demo.app.services.UserDataService;
 @RequestMapping("/")
 public class UserDataController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UserDataController.class);
 	private final UserDataService userService;
 
 	@Autowired
@@ -41,15 +38,14 @@ public class UserDataController {
 	@ResponseStatus(code = HttpStatus.CREATED)
 	public long receiveData(@RequestBody @Valid UserDto userDto, Errors errors) {
 		if (errors.hasErrors()) {
-			throw new UserDataProcessingException(userDto);
+			throw new UserDataProcessingException(errors);
 		}
-		LOG.info("[PROCESSING_PAYLOAD]: " + userDto);
 		return userService.process(userDto);
 	}
 
 	@ExceptionHandler(UserDataProcessingException.class)
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
 	public String handleUserDataProcessingException(UserDataProcessingException ex) {
-		return ex.getMessage();
+		return ex.getErrors().getAllErrors().get(0).getDefaultMessage();
 	}
 }

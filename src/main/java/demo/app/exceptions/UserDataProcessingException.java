@@ -1,6 +1,6 @@
 package demo.app.exceptions;
 
-import demo.app.dtos.UserDto;
+import org.springframework.validation.Errors;
 
 /**
  * Runtime exception when received user data is invalid
@@ -11,13 +11,13 @@ import demo.app.dtos.UserDto;
 public class UserDataProcessingException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
-	private final UserDto user;
+	private final Errors errors;
 
-	public UserDataProcessingException(UserDto userDto) {
-		this.user = userDto;
+	public UserDataProcessingException(Errors errors) {
+		this.errors = errors;
 	}
 
-	public String getMessage() {
-		return "Invalid data: { name: " + user.getName() + ", email: " + user.getEmail() + " }";
+	public Errors getErrors() {
+		return errors;
 	}
 }

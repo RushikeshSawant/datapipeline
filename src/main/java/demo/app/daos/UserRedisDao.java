@@ -15,8 +15,6 @@ import com.cedarsoftware.util.io.JsonWriter;
 import demo.app.dtos.UserDto;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
 
 /**
  * DAO to handle redis persistence
@@ -44,19 +42,17 @@ public class UserRedisDao {
 		jsonWriterArgs.put(JsonWriter.TYPE, false);
 	}
 
-	public Long save(UserDto userDto) {
+	public long save(UserDto userDto) {
 		Jedis jedis = pool.getResource();
 		String userJson = JsonWriter.objectToJson(userDto, jsonWriterArgs);
-		Response<Long> resp = null;
+		Long id = null;
 		try {
-			Pipeline pipline = jedis.pipelined();
-			resp = pipline.rpush(REDIS_KEY, userJson);
-			pipline.sync();
+			id = jedis.rpush(REDIS_KEY, userJson);
 		} finally {
 			jedis.close();
 		}
 		LOG.info("[PUSHED_TO_REDIS]: " + userJson);
-		return resp.get();
+		return id.longValue();
 	}
 
 }

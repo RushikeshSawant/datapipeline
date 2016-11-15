@@ -1,5 +1,7 @@
 package demo.app.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import demo.app.dtos.UserDto;
 @Service
 public class UserDataService implements IProcessor<UserDto> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(UserDataService.class);
 	private final UserRedisDao redisDao;
 
 	@Autowired
@@ -24,6 +27,8 @@ public class UserDataService implements IProcessor<UserDto> {
 
 	@Override
 	public long process(UserDto user) {
+		LOG.info("[PROCESSING_USER_DATA]: " + user);
+		// For these resources we just hand over the data to dao.
 		return redisDao.save(user);
 	}
 
