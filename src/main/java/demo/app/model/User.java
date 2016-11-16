@@ -30,6 +30,7 @@ public class User {
 	private String email;
 
 	public User() {
+	    // default no arg constructor
 	}
 
 	public User(long id) {

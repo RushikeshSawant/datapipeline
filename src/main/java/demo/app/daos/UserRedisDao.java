@@ -24,7 +24,8 @@ public class UserRedisDao {
 	private static final Logger LOG = LoggerFactory.getLogger(UserRedisDao.class);
 	private final JedisPool pool;
 	private final ObjectMapper mapper;
-	public static final String REDIS_KEY = "USER_DATA";
+	private static final String REDIS_KEY = "USER_DATA";
+	private static final String EMPTY_STRING = "";
 
 	@Autowired
 	public UserRedisDao(JedisPool pool, ObjectMapper mapper) {
@@ -35,7 +36,7 @@ public class UserRedisDao {
 
 	public long save(UserDto userDto) {
 		Jedis jedis = pool.getResource();
-		String userJson = "";
+		String userJson = EMPTY_STRING;
 		try {
 			userJson = mapper.writeValueAsString(userDto);
 		} catch (JsonProcessingException e) {

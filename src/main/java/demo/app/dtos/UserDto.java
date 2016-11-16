@@ -16,7 +16,7 @@ public class UserDto implements IResource {
 	@Size(min = 3, max = 20, message = "Invalid name!")
 	private String name;
 
-	// TODO: maybe provide custom validator for email
+	// FIXME: maybe provide custom validator for email
 	@NotEmpty(message = "Email cannot be empty!")
 	private String email;
 

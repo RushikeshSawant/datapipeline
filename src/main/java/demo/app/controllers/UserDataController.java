@@ -1,5 +1,7 @@
 package demo.app.controllers;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,11 @@ public class UserDataController {
 			throw new UserDataProcessingException(errors);
 		}
 		return userService.process(userDto);
+	}
+	
+	@RequestMapping(path = "allusers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<UserDto> getAllUsers(){
+	    return userService.findAllUsers();
 	}
 
 	@ExceptionHandler(UserDataProcessingException.class)

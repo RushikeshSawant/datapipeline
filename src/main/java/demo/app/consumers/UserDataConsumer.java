@@ -18,63 +18,66 @@ import demo.app.services.UserDataFeedService;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Consumer for fetching user data from redis queue.
+ * @author rushikesh
+ *
+ */
 @Service
 public class UserDataConsumer implements IConsumer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UserDataConsumer.class);
-	private final JedisPool pool;
-	private final UserSqlDao dao;
-	private final ObjectMapper mapper;
-	private final UserDataFeedService feedService;
-	public static final String REDIS_KEY = "USER_DATA";
+    private static final Logger LOG = LoggerFactory.getLogger(UserDataConsumer.class);
+    private final JedisPool pool;
+    private final UserSqlDao dao;
+    private final ObjectMapper mapper;
+    private final UserDataFeedService feedService;
+    private static final String REDIS_KEY = "USER_DATA";
 
-	@Autowired
-	public UserDataConsumer(JedisPool pool, UserSqlDao dao, ObjectMapper mapper, UserDataFeedService feedService) {
-		this.pool = pool;
-		this.dao = dao;
-		this.mapper = mapper;
-		this.feedService = feedService;
-	}
+    @Autowired
+    public UserDataConsumer(JedisPool pool, UserSqlDao dao, ObjectMapper mapper, UserDataFeedService feedService) {
+        this.pool = pool;
+        this.dao = dao;
+        this.mapper = mapper;
+        this.feedService = feedService;
+    }
 
-	@Override
-	@Scheduled(fixedDelay = 1000, initialDelay = 3000)
-	public void consume() {
-		final Jedis jedis = pool.getResource();
-		List<String> data = Collections.emptyList();
-		try {
-			data = jedis.blpop(1, REDIS_KEY);
-		} finally {
-			jedis.close();
-		}
-		data.stream().filter(elm -> !elm.equals(REDIS_KEY))
-		.peek(elm -> {
-			LOG.info("[USER_DATA_REDIS]: " + elm);
-		}).map(elm -> mapToUser(elm))
-		.peek(elm -> {
-			LOG.info("TEST: " + elm.getClass().getCanonicalName());
-		}).forEach(elm -> {
-			publishToWebSocket(elm);
-			saveToDataStore(elm);
-		});
-	}
+    @Override
+    @Scheduled(fixedDelay = 1000, initialDelay = 3000)
+    public void consume() {
+        final Jedis jedis = pool.getResource();
+        List<String> data = Collections.emptyList();
+        try {
+            data = jedis.blpop(1, REDIS_KEY);
+        } finally {
+            jedis.close();
+        }
+        data.stream().filter(elm -> !elm.equals(REDIS_KEY))
+        .peek(elm -> {
+            LOG.info("[USER_DATA_REDIS]: " + elm);
+        })
+        .map(elm -> mapToUser(elm)).forEach(elm -> {
+            publishToWebSocket(elm);
+            saveToDataStore(elm);
+        });
+    }
 
-	private User mapToUser(String jsonUser) {
-		User user = null;
-		try {
-			user = mapper.readValue(jsonUser, User.class);
-		} catch (IOException e) {
-			LOG.error("[JACKSON_FAILED]: ", e);
-		}
-		return user;
-	}
+    private User mapToUser(String jsonUser) {
+        User user = null;
+        try {
+            user = mapper.readValue(jsonUser, User.class);
+        } catch (IOException e) {
+            LOG.error("[JACKSON_FAILED]: ", e);
+        }
+        return user;
+    }
 
-	private void publishToWebSocket(User user) {
-		feedService.publishData(user);
-}
+    private void publishToWebSocket(User user) {
+        feedService.publishData(user);
+    }
 
-	private void saveToDataStore(User user) {
-		LOG.info("[PUSH_TO_DATASTORE]: " + user.getEmail());
-		dao.save(user);
-	}
+    private void saveToDataStore(User user) {
+        LOG.info("[PUSH_TO_DATASTORE]: " + user.getEmail());
+        dao.save(user);
+    }
 
 }

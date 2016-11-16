@@ -81,12 +81,17 @@
 			if (name == "" || email == "")
 				return;
 
-					$.post("/users",
-					{
+			$.ajax(
+			  {
+			     url: "/users",
+			     data: JSON.stringify({
 						"name": name,
 						"email": email
-					},
-					);
+					}),
+			     processData: false,
+			     type: 'POST',
+			     contentType: 'application/json'
+		     });
 		});
 	});
 </script>
