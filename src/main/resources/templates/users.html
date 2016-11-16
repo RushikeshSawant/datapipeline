@@ -1,0 +1,94 @@
+<html>
+
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" />
+	<title>Realtime User Feed</title>
+</head>
+
+<body>
+	<div class="card">
+		<div class="card-header">
+			<h3>Enter User Data:</h3>
+		</div>
+		<div class="card-body">
+
+			<div class="form-group row paddTop2">
+				<label for="example-text-input" class="col-xs-2 col-form-label">Name:</label>
+				<div class="col-xs-9">
+					<input class="form-control" type="text" id="example-name-input" placeholder="Enter Name" />
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label for="example-text-input" class="col-xs-2 col-form-label">Email:</label>
+				<div class="col-xs-9">
+					<input class="form-control" type="email" id="example-email-input" placeholder="Enter Email" />
+				</div>
+			</div>
+			<div class="btnCenter">
+				<button type="button" id="send" class="btn btn-primary">Send</button>
+			</div>
+		</div>
+
+		<div class="card-footer">
+			<div>
+				<h5>Realtime User Feed:</h5>
+				<ol id="messages"></ol>
+			</div>
+		</div>
+	</div>
+</body>
+<style>
+	.paddTop2 {
+		padding-top: 2%;
+	}
+
+	.btnCenter {
+		margin-left: 50%;
+		padding-bottom: 2%;
+	}
+
+	.card {
+		width: 50%;
+		margin-left: 25%;
+	}
+</style>
+
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		var messageList = $("#messages");
+
+		var getMessageString = function(message) {
+			return "<li><p>Name:" + message.name + "</p> Email: " + message.email + "</li>";
+		};
+
+		var socket = new SockJS('/livefeed');
+		var stompClient = Stomp.over(socket);
+		stompClient.connect({}, function(frame) {
+			stompClient.subscribe('/topic/userfeed', function(data) {
+				var message = JSON.parse(data.body);
+				messageList.prepend(getMessageString(message));
+			});
+		});
+
+		$("#send").on("click", function() {
+			var name = document.getElementById("example-name-input").value;
+			var email = document.getElementById("example-email-input").value;
+			if (name == "" || email == "")
+				return;
+
+					$.post("/users",
+					{
+						"name": name,
+						"email": email
+					},
+					);
+		});
+	});
+</script>
+
+</html>

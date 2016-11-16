@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import demo.app.daos.UserSqlDao;
 import demo.app.model.User;
+import demo.app.services.UserDataFeedService;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -24,13 +25,15 @@ public class UserDataConsumer implements IConsumer {
 	private final JedisPool pool;
 	private final UserSqlDao dao;
 	private final ObjectMapper mapper;
+	private final UserDataFeedService feedService;
 	public static final String REDIS_KEY = "USER_DATA";
 
 	@Autowired
-	public UserDataConsumer(JedisPool pool, UserSqlDao dao, ObjectMapper mapper) {
+	public UserDataConsumer(JedisPool pool, UserSqlDao dao, ObjectMapper mapper, UserDataFeedService feedService) {
 		this.pool = pool;
 		this.dao = dao;
 		this.mapper = mapper;
+		this.feedService = feedService;
 	}
 
 	@Override
@@ -66,7 +69,8 @@ public class UserDataConsumer implements IConsumer {
 	}
 
 	private void publishToWebSocket(User user) {
-	}
+		feedService.publishData(user);
+}
 
 	private void saveToDataStore(User user) {
 		LOG.info("[PUSH_TO_DATASTORE]: " + user.getEmail());
