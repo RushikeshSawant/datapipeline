@@ -1,16 +1,12 @@
 package demo.app.daos;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.cedarsoftware.util.io.JsonWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import demo.app.dtos.UserDto;
 import redis.clients.jedis.Jedis;
@@ -27,24 +23,24 @@ public class UserRedisDao {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UserRedisDao.class);
 	private final JedisPool pool;
+	private final ObjectMapper mapper;
 	public static final String REDIS_KEY = "USER_DATA";
-	private Map<String, Object> jsonWriterArgs;
 
 	@Autowired
-	public UserRedisDao(JedisPool pool) {
+	public UserRedisDao(JedisPool pool, ObjectMapper mapper) {
 		this.pool = pool;
+		this.mapper = mapper;
 	}
 
-	@PostConstruct
-	private void configureJsonWriter() {
-		// Going with simple json-io library
-		jsonWriterArgs = new HashMap<>();
-		jsonWriterArgs.put(JsonWriter.TYPE, false);
-	}
 
 	public long save(UserDto userDto) {
 		Jedis jedis = pool.getResource();
-		String userJson = JsonWriter.objectToJson(userDto, jsonWriterArgs);
+		String userJson = "";
+		try {
+			userJson = mapper.writeValueAsString(userDto);
+		} catch (JsonProcessingException e) {
+			LOG.error("[JACKSON_FAILED]: ", e);
+		}
 		Long id = null;
 		try {
 			id = jedis.rpush(REDIS_KEY, userJson);
