@@ -1,13 +1,15 @@
 version: '2'
 services:
   mysql:
-    image: mysql
+    image: mysql:5.7
     volumes:
       - "./.data/db:/var/lib/mysql"
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=study_lab
+      MYSQL_ROOT_PASSWORD: jecht
+      MYSQL_DATABASE: proto_lab
+      MYSQL_USER: jecht
+      MYSQL_PASSWORD: jecht
   redis:
     image: redis
   activemq:
@@ -23,6 +25,13 @@ services:
       - redis
       - activemq
     environment:
-      - MYSQL_HOST=mysql
-      - REDIS_HOST=redis
-      - ACTIVEMQ_HOST=activemq
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_SCHEMA: proto_lab
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MQ_HOST: activemq
+      MYSQL_USER_NAME: jecht
+      MYSQL_PASSWORD: jecht
+      MQ_USER_NAME: admin
+      MQ_PASSWORD: admin

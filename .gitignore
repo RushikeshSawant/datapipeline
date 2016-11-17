@@ -4,6 +4,12 @@
 ### Git ###
 *.orig
 
+### Mac stuff ###
+.Ds_Store
+
+### Docker Volumes ###
+.data/
+
 ### Eclipse ###
 
 .metadata
