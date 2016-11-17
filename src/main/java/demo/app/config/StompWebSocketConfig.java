@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
 /**
- * Websocket with STOMP related configuration
+ * Websocket/STOMP related configuration
  * @author rushikesh
  *
  */
@@ -16,11 +16,14 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 @EnableWebSocketMessageBroker
 public class StompWebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer{
 
-    @Value("${spring.broker.user}")
+    @Value("${spring.messagebroker.user}")
     private String username;
     
-    @Value("${spring.broker.password}")
+    @Value("${spring.messagebroker.password}")
     private String password;
+    
+    @Value("${spring.messagebroker.relayhost}")
+    private String relayHost;
     
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -31,6 +34,7 @@ public class StompWebSocketConfig extends AbstractWebSocketMessageBrokerConfigur
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableStompBrokerRelay("/queue", "/topic")
 		.setClientLogin(username)
-		.setClientPasscode(password);
+		.setClientPasscode(password)
+		.setRelayHost(relayHost);
 	}
 }

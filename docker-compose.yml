@@ -1,0 +1,28 @@
+version: '2'
+services:
+  mysql:
+    image: mysql
+    volumes:
+      - "./.data/db:/var/lib/mysql"
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=study_lab
+  redis:
+    image: redis
+  activemq:
+    image: webcenter/activemq
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/code
+    depends_on:
+      - mysql
+      - redis
+      - activemq
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - ACTIVEMQ_HOST=activemq
